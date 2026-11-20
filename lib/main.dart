@@ -22,8 +22,44 @@ class SaboreApp extends StatelessWidget {
   );
 }
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final _controller = TextEditingController();
+  String? _error;
+  String? _term;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _search() {
+    final term = _controller.text.trim().replaceAll(RegExp(r'\s+'), ' ');
+    if (term.isEmpty) {
+      setState(() => _error = 'Digite o nome de uma receita para pesquisar.');
+      return;
+    }
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _error = null;
+      _term = term;
+    });
+  }
+
+  void _newSearch() {
+    _controller.clear();
+    setState(() {
+      _term = null;
+      _error = null;
+    });
+  }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -76,10 +112,57 @@ class HomePage extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           const Text(
-            'Em breve: pesquisa por nome e receitas da API.',
+            'Pesquise pelo nome da receita que deseja preparar.',
             style: TextStyle(color: Color(0xFF66786E)),
           ),
           const SizedBox(height: 18),
+          TextField(
+            controller: _controller,
+            textInputAction: TextInputAction.search,
+            onSubmitted: (_) => _search(),
+            onChanged: (_) {
+              if (_error != null) setState(() => _error = null);
+            },
+            decoration: InputDecoration(
+              labelText: 'Nome da receita',
+              hintText: 'Ex.: Pasta Primavera',
+              errorText: _error,
+              prefixIcon: const Icon(Icons.search),
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          FilledButton(
+            onPressed: _search,
+            style: FilledButton.styleFrom(backgroundColor: green),
+            child: const Text('Buscar receitas'),
+          ),
+          if (_term != null) ...[
+            const SizedBox(height: 14),
+            Text(
+              'Pesquisa recebida: $_term',
+              style: const TextStyle(color: ink, fontWeight: FontWeight.w700),
+            ),
+            TextButton.icon(
+              onPressed: _newSearch,
+              icon: const Icon(Icons.close),
+              label: const Text('Nova pesquisa'),
+            ),
+          ],
+          const SizedBox(height: 22),
+          const Text(
+            'Sugestões',
+            style: TextStyle(
+              color: ink,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 12),
           const _PreviewCard(
             name: 'Pasta Primavera',
             detail: 'Uma opção para o almoço',
