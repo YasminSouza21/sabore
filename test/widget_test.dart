@@ -1,33 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sabore/main.dart';
+import 'package:sabore/src/app.dart';
 
 void main() {
-  testWidgets('mostra a identidade e o layout inicial', (tester) async {
+  testWidgets('navega entre lista, detalhe e favoritos', (tester) async {
     await tester.pumpWidget(const SaboreApp());
-    expect(find.text('Saborê'), findsOneWidget);
-    expect(find.text('Encontre sua próxima receita'), findsOneWidget);
-    expect(find.text('Descubra receitas'), findsOneWidget);
-  });
+    await tester.pumpAndSettle();
+    expect(find.text('Pasta Primavera'), findsOneWidget);
 
-  testWidgets('valida espaços e permite repetir a pesquisa', (tester) async {
-    await tester.pumpWidget(const SaboreApp());
-    await tester.enterText(find.byType(TextField), '   ');
-    await tester.tap(find.text('Buscar receitas'));
+    await tester.tap(find.byTooltip('Adicionar aos favoritos').first);
     await tester.pump();
-    expect(
-      find.text('Digite o nome de uma receita para pesquisar.'),
-      findsOneWidget,
-    );
-    expect(find.textContaining('Pesquisa recebida:'), findsNothing);
+    await tester.tap(find.text('Favoritos'));
+    await tester.pumpAndSettle();
+    expect(find.text('Pasta Primavera'), findsOneWidget);
 
-    await tester.enterText(find.byType(TextField), '  Pasta   Primavera  ');
+    await tester.tap(find.text('Pasta Primavera'));
+    await tester.pumpAndSettle();
+    expect(find.text('Ingredientes'), findsOneWidget);
+    expect(find.text('Massa'), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text('Favoritos'), findsWidgets);
+
+    await tester.tap(find.text('Explorar'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextField), 'Pasta');
     await tester.tap(find.text('Buscar receitas'));
-    await tester.pump();
-    expect(find.text('Pesquisa recebida: Pasta Primavera'), findsOneWidget);
-    await tester.ensureVisible(find.text('Nova pesquisa'));
-    await tester.tap(find.text('Nova pesquisa'));
-    await tester.pump();
-    expect(find.textContaining('Pesquisa recebida:'), findsNothing);
+    await tester.pumpAndSettle();
+    expect(find.text('Resultados para “Pasta”'), findsOneWidget);
+    await tester.tap(find.text('Pasta Primavera'));
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text('Resultados para “Pasta”'), findsOneWidget);
   });
 }

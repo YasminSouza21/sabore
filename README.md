@@ -1,6 +1,6 @@
 # Saborê
 
-Projeto Flutter mobile de receitas. A primeira etapa definiu a identidade visual e o layout da tela principal. A segunda acrescentou pesquisa por nome com validação de consulta vazia, tratamento de espaços, feedback do termo e nova pesquisa. Os resultados ainda são provisórios.
+Projeto Flutter mobile de receitas. As primeiras etapas definiram a interface inicial e a pesquisa por nome. Esta etapa acrescenta as telas Explorar, Detalhes e Favoritos, com navegação funcional. As receitas ainda são locais e provisórias; a integração remota será acrescentada na entrega final.
 
 ## Executar
 
