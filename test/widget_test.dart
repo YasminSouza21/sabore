@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:sabore/src/app.dart';
+import 'package:sabore/src/recipe.dart';
 import 'package:sabore/src/recipe_api.dart';
 
 void main() {
@@ -112,5 +113,10 @@ void main() {
     await expectLater(api.list(), throwsA(isA<RecipeApiException>()));
     await expectLater(api.search('pasta'), throwsA(isA<RecipeApiException>()));
     api.dispose();
+  });
+
+  test('usa nome alternativo quando a API omite o título', () {
+    final recipe = Recipe.fromJson({'id': 7, 'ingredients': <String>[]});
+    expect(recipe.name, 'Receita sem nome');
   });
 }

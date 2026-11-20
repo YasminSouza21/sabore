@@ -37,12 +37,14 @@ class Recipe {
     }
     final id = value['id'];
     final name = value['name'];
-    if (id is! int || name is! String) {
+    if (id is! int) {
       throw const FormatException('Receita sem identidade.');
     }
     return Recipe(
       id: id,
-      name: name.trim().isEmpty ? 'Receita sem nome' : name,
+      name: name is String && name.trim().isNotEmpty
+          ? name.trim()
+          : 'Receita sem nome',
       ingredients: _strings(value['ingredients']),
       instructions: _strings(value['instructions']),
       image: _nonEmpty(value['image']),
