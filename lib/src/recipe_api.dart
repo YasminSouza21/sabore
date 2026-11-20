@@ -1,37 +1,42 @@
+import 'dart:convert';
+
+import 'package:http/http.dart' as http;
+
 import 'recipe.dart';
 
 class RecipeApi {
-  static const _examples = [
-    Recipe(
-      id: 1,
-      name: 'Pasta Primavera',
-      ingredients: ['Massa', 'Tomate', 'Azeite'],
-      instructions: ['Cozinhe a massa.', 'Misture os ingredientes e sirva.'],
-      prepMinutes: 10,
-      cookMinutes: 20,
-      servings: 2,
-      difficulty: 'Fácil',
-      cuisine: 'Italiana',
-      mealTypes: ['Almoço'],
-    ),
-    Recipe(
-      id: 2,
-      name: 'Salada fresca',
-      ingredients: ['Alface', 'Tomate'],
-      instructions: ['Lave os ingredientes.', 'Misture e sirva.'],
-      prepMinutes: 12,
-      cookMinutes: 0,
-      servings: 2,
-      difficulty: 'Fácil',
-      mealTypes: ['Acompanhamento'],
-    ),
-  ];
+  RecipeApi({http.Client? client}) : _client = client ?? http.Client();
+  final http.Client _client;
+  static final _base = Uri.parse('https://dummyjson.com');
 
-  Future<List<Recipe>> list() async => _examples;
+  Future<List<Recipe>> list() =>
+      _fetch(_base.replace(path: '/recipes', queryParameters: {'limit': '0'}));
 
-  Future<List<Recipe>> search(String term) async => _examples
-      .where((recipe) => recipe.name.toLowerCase().contains(term.toLowerCase()))
-      .toList();
+  Future<List<Recipe>> search(String term) => _fetch(
+    _base.replace(path: '/recipes/search', queryParameters: {'q': term}),
+  );
 
-  void dispose() {}
+  Future<List<Recipe>> _fetch(Uri uri) async {
+    try {
+      final response = await _client
+          .get(uri)
+          .timeout(const Duration(seconds: 12));
+      if (response.statusCode != 200) throw const RecipeApiException();
+      final decoded = jsonDecode(response.body);
+      if (decoded is! Map<String, dynamic> || decoded['recipes'] is! List) {
+        throw const RecipeApiException();
+      }
+      return (decoded['recipes'] as List).map(Recipe.fromJson).toList();
+    } on RecipeApiException {
+      rethrow;
+    } catch (_) {
+      throw const RecipeApiException();
+    }
+  }
+
+  void dispose() => _client.close();
+}
+
+class RecipeApiException implements Exception {
+  const RecipeApiException();
 }
